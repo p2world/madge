@@ -29,7 +29,7 @@ describe('module format (CommonJS)', () => {
 	it('should handle strings in require call', () => {
 		madge([__dirname + '/files/cjs/strings.js'])
 			.obj().should.eql({strings: [
-				'events', 'node_modules/a', 'node_modules/b', 'node_modules/c',
+				'node_modules/a', 'node_modules/b', 'node_modules/c',
 				'node_modules/doom', 'node_modules/events2', 'node_modules/y'
 			]});
 	});
@@ -57,5 +57,10 @@ describe('module format (CommonJS)', () => {
 	it('should compile coffeescript on-the-fly', () => {
 		madge([__dirname + '/files/cjs/coffeescript'])
 			.obj().should.eql({'a': ['./b'], 'b': []});
+	});
+
+	it('should exclude core modules like the fs module', () => {
+		madge([__dirname + '/files/cjs/core.js'])
+			.obj().should.eql({core: ['node_modules/a']});
 	});
 });
