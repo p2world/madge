@@ -29,7 +29,7 @@ describe('module format (CommonJS)', () => {
 	it('should handle strings in require call', () => {
 		madge([__dirname + '/files/cjs/strings.js'])
 			.obj().should.eql({strings: [
-				'node_modules/a', 'node_modules/b', 'node_modules/c',
+				'events', 'node_modules/a', 'node_modules/b', 'node_modules/c',
 				'node_modules/doom', 'node_modules/events2', 'node_modules/y'
 			]});
 	});
@@ -59,8 +59,13 @@ describe('module format (CommonJS)', () => {
 			.obj().should.eql({'a': ['./b'], 'b': []});
 	});
 
-	it('should exclude core modules like the fs module', () => {
-		madge([__dirname + '/files/cjs/core.js'])
+	it('should be able to exclude core modules', () => {
+		madge([__dirname + '/files/cjs/core.js'], {commonjs: {includeCore: false}})
 			.obj().should.eql({core: ['node_modules/a']});
+	});
+
+	it('should be able to exclude NPM modules', () => {
+		madge([__dirname + '/files/cjs/npm.js'], {commonjs: {includeNpm: false}})
+			.obj().should.eql({npm: ['normal/d']});
 	});
 });
