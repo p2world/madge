@@ -7,7 +7,14 @@
 [![NPM Status](http://img.shields.io/npm/dm/madge.svg?style=flat-square)](https://www.npmjs.org/package/madge)
 [![Donate](https://img.shields.io/badge/donate-paypal-blue.svg?style=flat-square)](https://paypal.me/pahen)
 
-Create graphs from your [CommonJS](http://nodejs.org/api/modules.html), [AMD](https://github.com/amdjs/amdjs-api/wiki/AMD) or [ES6](https://people.mozilla.org/~jorendorff/es6-draft.html) module dependencies. Could also be useful for finding circular dependencies in your code. Tested on [Node.js](http://nodejs.org/) and [RequireJS](http://requirejs.org/) projects. Dependencies are calculated using static code analysis. CommonJS dependencies are found using James Halliday's [detective](https://github.com/substack/node-detective), for AMD I'm using [amdetective](https://www.npmjs.org/package/amdetective) and for ES6 [detective-es6](https://www.npmjs.com/package/detective-es6) is used. Modules written in [CoffeeScript](http://coffeescript.org/) with extension .coffee are supported and will automatically be compiled on-the-fly.
+Can be used for creating graphs from your dependencies or find circular dependencies in your code. The dependencies are calculated using Joel Kemp's awesome [dependency-tree](https://github.com/mrjoelkemp/node-dependency-tree).
+
+Works for JS (AMD, CommonJS, ES6 modules) and CSS preprocessors (Sass, Stylus); basically, any filetype supported by [precinct](https://github.com/mrjoelkemp/node-precinct).
+
+  - For CommonJS modules, 3rd party dependencies (npm installed dependencies) are included in the tree by default
+  - Dependency path resolutions are handled by [filing-cabinet](https://github.com/mrjoelkemp/node-filing-cabinet)
+  - Supports RequireJS and Webpack loaders
+  - All core Node modules (assert, path, fs, etc) are removed from the dependency list by default
 
 ## Examples
 Here's a very simple example of a generated image.
@@ -28,12 +35,6 @@ And some terminal usage.
 
 # Installation
 
-To install as a library:
-
-	$ npm install madge
-
-To install the CLI:
-
 	$ npm -g install madge
 
 ## Graphviz (optional)
@@ -42,11 +43,7 @@ Only required if you want to generate the visual graphs using [Graphviz](http://
 
 ### Mac OS X
 
-	$ port install graphviz
-
-OR
-
-	$ brew install graphviz
+	$ brew install graphviz || port install graphviz
 
 ### Ubuntu
 
@@ -55,48 +52,20 @@ OR
 # API
 
 	var madge = require('madge');
-	var dependencyObject = madge('./');
-	console.log(dependencyObject.tree);
+	var dependencyObject = madge('./app.js');
+	console.log(dependencyObject.obj());
 
-## madge(src, opts)
+## madge(filename, opts)
 
-{Object|Array|String} **src** (required)
+{String} **filename** (required)
 
-- Object - a dependency tree.
-- Array - an Array of directories to scan.
-- String - a directory to scan.
+- String - a file to scan directory to scan.
 
-{Object} **opts** (optional)
-
-- {String} **format**. The module format to expect, 'cjs', 'amd' or 'es6'. Commonjs (cjs) is the default format.
-- {String} **exclude**. String from which a regex will be constructed for excluding files from the scan.
-- {Boolean} **breakOnError**. True if the parser should stop on parse errors and when modules are missing, false otherwise. Defaults to false.
-- {Boolean} **optimized**. True if the parser should read modules from a optimized file (r.js). Defaults to false.
-- {Boolean} **findNestedDependencies**. True if nested dependencies should be found in AMD modules. Defaults to false.
-- {String} **mainRequireModule**. Name of the module if parsing an optimized file (r.js), where the main file used `require()` instead of `define`. Defaults to `''`.
-- {String} **requireConfig**. Path to RequireJS config used to find shim dependencies and path aliases. Not used by default.
-- {Function} **onParseFile**. Function to be called when parsing a file (argument will be an object with "filename" and "src" property set).
-- {Function} **onAddModule** . Function to be called when adding a module to the module tree (argument will be an object with "id" and "dependencies" property set).
-- {Array} **extensions**. List of file extensions which are considered. Defaults to `['.js']`.
-
-## dependency object (returned from madge)
-
-#### .opts
-
-Options object passed used in the constructor.
-
-#### .tree
-
-Dependency tree object. Can be overwritten with an object in the format:
-
-	{
-	     'module1': ['dep1a', 'dep1b'],
-	     'module2': ['dep2a']
-	}
+## Object returned from madge()
 
 #### .obj()
 
-Alias to the tree property.
+Get the dependency object.
 
 #### .circular()
 
@@ -131,98 +100,31 @@ Get an image representation of the module dependency graph.
 
 # CLI
 
-	Usage: madge [options] <file|dir ...>
-
-	Options:
-
-	-h, --help                       output usage information
-	-V, --version                    output the version number
-	-f, --format <name>              format to parse (amd/cjs/es6)
-	-s, --summary                    show summary of all dependencies
-	-L, --list                       show list of all dependencies
-	-c, --circular                   show circular dependencies
-	-d, --depends <id>               show modules that depends on the given id
-	-x, --exclude <regex>            a regular expression for excluding modules
-	-t, --dot                        output graph in the DOT language
-	-i, --image <filename>           write graph to file as a PNG image
-	-l, --layout <name>              layout engine to use for image graph (dot/neato/fdp/sfdp/twopi/circo)
-	-b, --break-on-error             break on parse errors & missing modules
-	-n, --no-colors                  skip colors in output and images
-	-r, --read                       skip scanning folders and read JSON from stdin
-	-C, --config <filename>          provide a config file
-	-R, --require-config <filename>  include shim dependencies and path aliases found in RequireJS config file
-	-O, --optimized                  if given file is optimized with r.js
-	-M  --main-require-module        name of the primary RequireJS module, if it's included with `require()`
-	-j  --json                       output dependency tree in json
-
-
 ## Examples:
 
-### List all module dependencies (CommonJS)
+### List all module dependencies
 
-	$ madge /path/src
-
-### List all module dependencies (AMD)
-
-	$ madge --format amd /path/src
-
-### List all module dependencies (ES6)
-
-	$ madge --format es6 /path/src
+	$ madge /path/src/app.js
 
 ### Finding circular dependencies
 
-	$ madge --circular /path/src
+	$ madge --circular /path/src/app.js
 
 ### Show modules that depends on a given module
 
-	$ madge --depends 'wheels' /path/src
+	$ madge --depends 'wheels' /path/src/app.js
 
 ### Excluding modules
 
-	$ madge --exclude '^foo$|^bar$|^tests' /path/src
+	$ madge --exclude '^foo$|^bar$|^tests' /path/src/app.js
 
 ### Save graph as a PNG image (graphviz required)
 
-	$ madge --image graph.png /path/src
+	$ madge --image graph.png /path/src/app.js
 
 ### Save graph as a [DOT](http://en.wikipedia.org/wiki/DOT_language) file for further processing (graphviz required)
 
-	$ madge --dot /path/src > graph.gv
-
-### Run on optimized file by r.js (RequireJS optimizer)
-	$ r.js -o app-build.js
-	$ madge --format amd --optimized app-build.js
-
-### Include shim dependencies found in RequireJS config
-	$ madge --format amd --require-config path/config.js path/src
-
-### Pipe predefined results (the example image was produced with the following command)
-
-	$ cat << EOF | madge --read --image example.png
-	{
-		"a": ["b", "c", "d"],
-		"b": ["c"],
-		"c": [],
-		"d": ["a"]
-	}
-	EOF
-
-## Config (use with --config)
-
-	{
-	    "format": "amd",
-	    "image": "dependencyMap.png",
-	    "fontFace": "Arial",
-	    "fontSize": "14px",
-	    "imageColors": {
-	        "noDependencies" : "#0000ff",
-	        "dependencies" : "#00ff00",
-	        "circular" : "#bada55",
-	        "edge" : "#666666",
-	        "bgcolor": "#ffffff"
-	    }
-	}
+	$ madge --dot /path/src/app.js > graph.gv
 
 # FAQ
 

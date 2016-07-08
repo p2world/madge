@@ -1,8 +1,4 @@
 {
-	"format": "cjs",
-	"breakOnError": false,
-	"excludeModules": [],
-	"image": "/tmp/dependency_map.png",
 	"graphviz": {
 		"layout": "dot",
 		"fontFace": "Arial",
@@ -12,15 +8,5 @@
 		"isCircularColor": "#bada55",
 		"edgeColor": "#666666",
 		"bgColor": "#ffffff"
-	},
-	"commonjs": {
-		"includeCore": true,
-		"includeNpm": true
-  	},
-  	"es6": {},
-	"amd": {
-		"config": "",
-		"optimized": false,
-		"mainModule": ""
 	}
 }
