@@ -2,9 +2,6 @@
 
 'use strict';
 
-/**
- * Module dependencies
- */
 const fs = require('fs');
 const version = require('../package.json').version;
 const program = require('commander');
@@ -14,26 +11,17 @@ const madge = require('../lib/madge');
 program
 	.version(version)
 	.usage('[options] <file|dir ...>')
-	.option('-f, --format <name>', 'format to parse (amd/cjs/es6)', 'cjs')
-	.option('-L, --list', 'show list of all dependencies (default)')
-	.option('-s, --summary', 'show summary of all dependencies')
-	.option('-c, --circular', 'show circular dependencies')
-	.option('-d, --depends <id>', 'show modules that depends on the given id')
-	.option('-x, --exclude <regex>', 'a regular expression for excluding modules')
-	.option('-t, --dot', 'output graph in the DOT language')
-	.option('-i, --image <filename>', 'write graph to file as a PNG image')
-	.option('-l, --layout <name>', 'layout engine to use for image graph (dot/neato/fdp/sfdp/twopi/circo)', 'dot')
-	.option('-b, --break-on-error', 'break on parse errors & missing modules', false)
-	.option('-n, --no-colors', 'skip colors in output and images', false)
-	.option('-r, --read', 'skip scanning folders and read JSON from stdin')
-	.option('-C, --config <filename>', 'provide a config file')
-	.option('-R, --require-config <filename>', 'include shim dependencies and paths found in RequireJS config file')
-	.option('-O, --optimized', 'if given file is optimized with r.js', false)
-	.option('-N, --find-nested-dependencies', 'find nested dependencies in AMD modules', false)
-	.option('-M, --main-require-module <name>', 'name of the primary RequireJS module, if it\'s included with `require()`', '')
-	.option('-j --json', 'output dependency tree in json')
-	.option('-p --paths <directory>', 'additional comma separated paths to search for dependencies (CJS only)', '')
-	.option('-e --extensions <list>', 'comma separated string of valid file extensions', 'js,coffee')
+	.option('-c, --config <filename>', 'use configuration from this file instead of .madgerc')
+	.option('--format <name>', 'format to parse (amd/cjs/es6)', 'cjs')
+	.option('--list', 'show list of all dependencies (default)')
+	.option('--circular', 'show circular dependencies')
+	.option('--summary', 'show summary of all dependencies')
+	.option('--json', 'show list of dependencies as JSON')
+	.option('--image <filename>', 'write graph to file as a PNG image')
+	.option('--dot', 'show graph using the DOT language')
+	.option('--no-color', 'disable color in output and image', false)
+	.option('--stdin', 'skip scanning folders and read JSON from STDIN')
+	.option('--debug', 'output debugging information')
 	.parse(process.argv);
 
 if (!program.args.length && !program.read && !program.requireConfig) {
